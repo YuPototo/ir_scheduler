@@ -4,7 +4,10 @@ import { PrismaClient } from "@prisma/client";
 export default function deleteAccounts() {
     console.log("start running delete accounts job");
 
-    schedule.scheduleJob("0 * * * * *", async function () {
+    // 3 a.m. every day
+    const rule = "3 * * *";
+
+    schedule.scheduleJob(rule, async function () {
         const prisma = new PrismaClient();
 
         console.log(
