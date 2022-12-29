@@ -38,6 +38,7 @@ model Session {
 // https://next-auth.js.org/adapters/models#user
 model User {
     id              String            @id @default(cuid())
+    createdAt       DateTime          @default(now())
     email           String?           @unique
     emailVerified   DateTime?
     image           String?
@@ -153,7 +154,7 @@ model Rank {
     userId String @unique
     roi    Float
 
-    user User @relation(fields: [userId], references: [id])
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model LastTransaction {
