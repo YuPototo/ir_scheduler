@@ -1,0 +1,170 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// https://next-auth.js.org/adapters/models#account
+model Account {
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+// https://next-auth.js.org/adapters/models#session
+model Session {
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// https://next-auth.js.org/adapters/models#user
+model User {
+    id              String            @id @default(cuid())
+    email           String?           @unique
+    emailVerified   DateTime?
+    image           String?
+    firstName       String?
+    familyName      String?
+    accounts        Account[]
+    sessions        Session[]
+    userAsset       UserAsset[]
+    transaction     Transaction[]
+    rank            Rank[]
+    lastTransaction LastTransaction[]
+}
+
+// https://next-auth.js.org/adapters/models#verification-token
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+/// Asset Type
+/// Currently there are 2 types of assets
+enum AssetType {
+    CASH
+    CRYPTO
+    // STOCK
+}
+
+// This concept describe a unique entity of asset. Cash, BTC, Apple Stock etc.
+// This is a unique entity that can be bought and sold.
+/// Asset Entity
+/// Example: USD, BTC, ETH
+model AssetEntity {
+    id              Int               @id @default(autoincrement())
+    name            String            @unique /// For Bitcoin, it would be Bitcoin
+    symbol          String            @unique /// For Bitcoin, this would be BTC
+    buyable         Boolean           @default(true) /// USD is not buyable
+    assetType       AssetType
+    portfolioAsset  UserAsset[]
+    price           Price[]
+    transaction     Transaction[]
+    lastTransaction LastTransaction[]
+}
+
+/// UserAsset
+/// If a user has 5k Cash, 1 BTC and 1000 Apple Stock, then there would be 3 PortfolioAsset records
+model UserAsset {
+    id            Int     @id @default(autoincrement())
+    assetEntityId Int
+    quantity      Float
+    userId        String?
+
+    assetEntity AssetEntity @relation(fields: [assetEntityId], references: [id])
+    user        User?       @relation(fields: [userId], references: [id])
+
+    @@unique([userId, assetEntityId])
+}
+
+/// Price
+/// This is the price of an asset at a given time
+model Price {
+    id            Int      @id @default(autoincrement())
+    assetEntityId Int
+    price         Float
+    timestamp     DateTime /// this should be the datetime when the scheduler was run
+
+    assetEntity AssetEntity   @relation(fields: [assetEntityId], references: [id])
+    transaction Transaction[]
+
+    @@index([assetEntityId, timestamp])
+}
+
+/// Transaction
+enum TransactionType {
+    BUY
+    SELL
+}
+
+model Transaction {
+    id            String          @id @default(cuid())
+    assetEntityId Int
+    quantity      Float
+    priceId       Int
+    timestamp     DateTime /// this should be the datetime when the scheduler was run
+    type          TransactionType /// BUY or SELL
+    userId        String?
+
+    assetEntity AssetEntity @relation(fields: [assetEntityId], references: [id])
+    price       Price       @relation(fields: [priceId], references: [id])
+    user        User?       @relation(fields: [userId], references: [id])
+
+    @@index([userId])
+}
+
+/// Parameter
+enum ParameterType {
+    STRING
+    NUMBER
+    BOOLEAN
+}
+
+model Parameter {
+    id    Int           @id @default(autoincrement())
+    key   String        @unique
+    value String
+    type  ParameterType /// This is the type of the value. It can be string, number, boolean etc.
+}
+
+model Rank {
+    rank   Int    @id @default(autoincrement())
+    userId String @unique
+    roi    Float
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model LastTransaction {
+    id              Int             @id @default(autoincrement())
+    timestamp       DateTime
+    transactionType TransactionType
+    userId          String?
+    assetEntityId   Int?
+
+    user        User?        @relation(fields: [userId], references: [id])
+    assetEntity AssetEntity? @relation(fields: [assetEntityId], references: [id])
+
+    @@unique([userId, assetEntityId, transactionType])
+}
