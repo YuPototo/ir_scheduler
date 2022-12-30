@@ -25,8 +25,9 @@ export default function updatePriceAndRank() {
     console.log("start scheduling update price and roi job");
 
     // every 5 mins
-    // const rule = "*/5 * * * *";
-    const rule = "*/5 * * * * *"; // every 5 seconds for dev
+    const rule = "*/5 * * * *";
+    // const rule = "*/5 * * * * *"; // every 5 seconds for dev
+
     schedule.scheduleJob(rule, async function () {
         console.log("run update price job");
 
