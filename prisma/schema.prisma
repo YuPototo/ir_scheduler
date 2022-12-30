@@ -159,8 +159,7 @@ model Parameter {
 }
 
 model Rank {
-    id        Int      @id @default(autoincrement())
-    rank      Int
+    rank      Int      @id
     userId    String   @unique
     roi       Float
     timestamp DateTime
