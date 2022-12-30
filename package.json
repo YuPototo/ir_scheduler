@@ -24,7 +24,7 @@
         "test": "jest",
         "db-generate": "prisma generate",
         "db_up": "docker-compose -f docker-compose.dev.yml -p test_postgres_db up -d",
-        "db_migrate_test": "dotenv -e ./.env.test prisma migrate dev --name init",
+        "db_migrate_test": "dotenv -e ./.env.test -- prisma migrate dev --name init",
         "db_down": "docker-compose -f docker-compose.dev.yml -p test_postgres_db down"
     }
 }
