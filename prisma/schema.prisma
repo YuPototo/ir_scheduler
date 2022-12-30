@@ -102,15 +102,25 @@ model UserAsset {
 /// Price
 /// This is the price of an asset at a given time
 model Price {
-    id            Int      @id @default(autoincrement())
+    id            Int   @id @default(autoincrement())
     assetEntityId Int
     price         Float
-    timestamp     DateTime /// this should be the datetime when the scheduler was run
+    priceTimeId   Int
 
     assetEntity AssetEntity   @relation(fields: [assetEntityId], references: [id])
+    priceTime   PriceTime     @relation(fields: [priceTimeId], references: [id])
     transaction Transaction[]
 
-    @@index([assetEntityId, timestamp])
+    @@unique([assetEntityId, priceTimeId])
+}
+
+/// PriceTime
+/// This concept describes the time price getter scheduler is run
+model PriceTime {
+    id        Int      @id @default(autoincrement())
+    timestamp DateTime @unique @default(now())
+    Price     Price[]
+    Rank      Rank[]
 }
 
 /// Transaction
@@ -150,11 +160,13 @@ model Parameter {
 }
 
 model Rank {
-    rank   Int    @id @default(autoincrement())
-    userId String @unique
-    roi    Float
+    rank        Int    @id @default(autoincrement())
+    userId      String @unique
+    roi         Float
+    priceTimeId Int
 
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    priceTime PriceTime @relation(fields: [priceTimeId], references: [id])
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model LastTransaction {

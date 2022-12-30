@@ -11,7 +11,8 @@ export default function deleteAccounts() {
         const prisma = new PrismaClient();
 
         console.log(
-            "Start running delete accounts job at " + new Date().toISOString()
+            "Start scheduling delete accounts job at " +
+                new Date().toISOString()
         );
 
         // 7 days ago
