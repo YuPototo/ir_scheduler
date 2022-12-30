@@ -1,14 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../prisma/client";
 
 export interface AssetEntityPrice {
     id: number; // asset entity id
     price: number;
 }
 
-export async function updatePrice(
-    prisma: PrismaClient,
-    prices: AssetEntityPrice[]
-) {
+export async function updatePrice(prices: AssetEntityPrice[]) {
     // add a new priceTime
     const priceTime = await prisma.priceTime.create({ data: {} });
 
@@ -22,7 +19,7 @@ export async function updatePrice(
     await prisma.price.createMany({ data: priceData });
 }
 
-export async function updateRank(prisma: PrismaClient) {
+export async function updateRank() {
     const users = await prisma.user.findMany({});
 
     // get all asset entities' latest prices
@@ -34,10 +31,6 @@ export async function updateRank(prisma: PrismaClient) {
 }
 
 export default async function updatePriceAndRank(prices: AssetEntityPrice[]) {
-    const prisma = new PrismaClient();
-
-    await updatePrice(prisma, prices);
-    await updateRank(prisma);
-
-    await prisma.$disconnect();
+    await updatePrice(prices);
+    await updateRank();
 }

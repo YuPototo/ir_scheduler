@@ -1,5 +1,5 @@
 import schedule from "node-schedule";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../prisma/client";
 
 export default function deleteAccounts() {
     console.log("start running delete accounts job");
@@ -8,8 +8,6 @@ export default function deleteAccounts() {
     const rule = "3 * * *";
 
     schedule.scheduleJob(rule, async function () {
-        const prisma = new PrismaClient();
-
         console.log(
             "Start scheduling delete accounts job at " +
                 new Date().toISOString()
@@ -40,7 +38,5 @@ export default function deleteAccounts() {
                 },
             });
         }
-
-        await prisma.$disconnect();
     });
 }
