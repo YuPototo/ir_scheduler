@@ -18,5 +18,6 @@
         "titleBar.inactiveBackground": "#4f783799",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.color": "#4f7837"
+    "peacock.color": "#4f7837",
+    "jest.jestCommandLine": "yarn test"
 }
