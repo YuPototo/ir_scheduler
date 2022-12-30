@@ -7,6 +7,7 @@ import {
     toAssetEntityPrice,
 } from "../cryptoPrice";
 import { updatePrice } from "../dbUpdator/price";
+import { updateRank } from "../dbUpdator/rank";
 
 const cryptoAssets: CryptoAsset[] = [
     {
@@ -29,15 +30,16 @@ export default function updatePriceAndRank() {
     // const rule = "*/5 * * * * *"; // every 5 seconds for dev
 
     schedule.scheduleJob(rule, async function () {
-        console.log("run update price job");
+        console.log("run updatePriceAndRank job");
 
         await getAndUpdatePrice();
-
-        // todo: update rank
+        await updateRank();
     });
 }
 
 async function getAndUpdatePrice() {
+    console.log("get and update price: start -----");
+
     // get crypto quotes
     const cryptoIds = getCMCIds(cryptoAssets);
     const quoteRes = await getCryptoQuotes(cryptoIds);
@@ -60,4 +62,5 @@ async function getAndUpdatePrice() {
         console.log(err);
         return;
     }
+    console.log(" ----- get and update price: end");
 }

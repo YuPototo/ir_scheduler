@@ -2,6 +2,8 @@ import prisma from "../prisma/client";
 import getInitialDollar from "./initialValue";
 
 export async function updateRank() {
+    console.log("updateRank: start -----");
+
     // get initial dollar value
     const initialCapital = await getInitialDollar();
 
@@ -47,6 +49,8 @@ export async function updateRank() {
             data,
         }),
     ]);
+
+    console.log("----- updateRank: end");
 }
 
 // get latest prices for every assets
