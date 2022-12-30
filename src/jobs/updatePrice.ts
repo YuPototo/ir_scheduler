@@ -6,7 +6,7 @@ import {
     parseCmcData,
     toAssetEntityPrice,
 } from "../cryptoPrice";
-import updatePriceAndRank from "../dbUpdator";
+import { updatePrice } from "../dbUpdator/price";
 
 const cryptoAssets: CryptoAsset[] = [
     {
@@ -21,16 +21,22 @@ const cryptoAssets: CryptoAsset[] = [
     },
 ];
 
-export default function updatePriceAndRoi() {
+export default function updatePriceAndRank() {
     console.log("start scheduling update price and roi job");
 
     // every 5 mins
     // const rule = "*/5 * * * *";
     const rule = "*/5 * * * * *"; // every 5 seconds for dev
-    schedule.scheduleJob(rule, updatePriceJob);
+    schedule.scheduleJob(rule, async function () {
+        console.log("run update price job");
+
+        await getAndUpdatePrice();
+
+        // todo: update rank
+    });
 }
 
-async function updatePriceJob() {
+async function getAndUpdatePrice() {
     // get crypto quotes
     const cryptoIds = getCMCIds(cryptoAssets);
     const quoteRes = await getCryptoQuotes(cryptoIds);
@@ -45,10 +51,10 @@ async function updatePriceJob() {
 
     const cryptoPrices = parsedResult.cryptoPrices;
 
-    // update price and roi in the db
+    // update price in the db
     const assetEntityPrices = toAssetEntityPrice(cryptoPrices, cryptoAssets);
     try {
-        await updatePriceAndRank(assetEntityPrices);
+        await updatePrice(assetEntityPrices);
     } catch (err) {
         console.log(err);
         return;

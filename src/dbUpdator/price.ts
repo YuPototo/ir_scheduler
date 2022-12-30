@@ -18,19 +18,3 @@ export async function updatePrice(prices: AssetEntityPrice[]) {
 
     await prisma.price.createMany({ data: priceData });
 }
-
-export async function updateRank() {
-    const users = await prisma.user.findMany({});
-
-    // get all asset entities' latest prices
-
-    const result = [];
-    // calculate the roi for each user
-
-    // update the rank
-}
-
-export default async function updatePriceAndRank(prices: AssetEntityPrice[]) {
-    await updatePrice(prices);
-    await updateRank();
-}

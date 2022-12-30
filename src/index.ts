@@ -1,9 +1,9 @@
 import deleteAccountsJob from "./jobs/deleteAccounts";
-import updatePriceAndRoi from "./jobs/updatePrice";
+import updatePriceAndRank from "./jobs/updatePrice";
 
 async function main() {
     deleteAccountsJob();
-    updatePriceAndRoi();
+    updatePriceAndRank();
 }
 
 main();

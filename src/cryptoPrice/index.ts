@@ -1,4 +1,4 @@
-import { AssetEntityPrice } from "../dbUpdator";
+import { AssetEntityPrice } from "../dbUpdator/price";
 
 /**
  * get comma separated list of crypto ids, e.g. "1,1027" from cryptoAssets
