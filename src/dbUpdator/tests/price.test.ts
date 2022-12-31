@@ -3,10 +3,10 @@ import prisma from "../../prisma/client";
 import { updatePrice } from "../price";
 
 describe("updatePrice()", () => {
-    const btcId = 2;
-    const ethId = 3;
+    let btcId = 1000;
+    let ethId = 1001;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         // asset entities
         const assetEntities = [
             {
@@ -26,9 +26,12 @@ describe("updatePrice()", () => {
         await prisma.assetEntity.createMany({ data: assetEntities });
     });
 
+    afterAll(async () => {
+        await prisma.assetEntity.deleteMany();
+    });
+
     afterEach(async () => {
         await prisma.price.deleteMany();
-        await prisma.assetEntity.deleteMany();
         await prisma.priceTime.deleteMany();
     });
 
@@ -101,5 +104,40 @@ describe("updatePrice()", () => {
         });
         expect(price_eth_t2).not.toBeNull();
         expect(price_eth_t2!.price).toBe(3000);
+    });
+
+    it("price should round to 2 digits", async () => {
+        await updatePrice([
+            { id: btcId, price: 10000.123 },
+            { id: ethId, price: 1000.125 },
+        ]);
+
+        const priceTime = await prisma.priceTime.findFirst({
+            orderBy: { id: "desc" },
+        });
+        expect(priceTime).not.toBeNull();
+
+        const price_btc = await prisma.price.findUnique({
+            where: {
+                assetEntityId_priceTimeId: {
+                    assetEntityId: btcId,
+                    priceTimeId: priceTime!.id,
+                },
+            },
+        });
+
+        expect(price_btc).not.toBeNull();
+        expect(price_btc!.price).toBe(10000.12);
+
+        const price_eth = await prisma.price.findUnique({
+            where: {
+                assetEntityId_priceTimeId: {
+                    assetEntityId: ethId,
+                    priceTimeId: priceTime!.id,
+                },
+            },
+        });
+        expect(price_eth).not.toBeNull();
+        expect(price_eth!.price).toBe(1000.13);
     });
 });

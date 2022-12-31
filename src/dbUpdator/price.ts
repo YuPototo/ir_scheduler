@@ -13,7 +13,8 @@ export async function updatePrice(prices: AssetEntityPrice[]) {
     const priceData = prices.map((price) => ({
         assetEntityId: price.id,
         priceTimeId: priceTime.id,
-        price: price.price,
+        // round price to 2 digits
+        price: Math.round(price.price * 100) / 100,
     }));
 
     await prisma.price.createMany({ data: priceData });
