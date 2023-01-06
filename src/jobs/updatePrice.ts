@@ -20,6 +20,46 @@ const cryptoAssets: CryptoAsset[] = [
         symbol: "ETH",
         cmcId: 1027,
     },
+    {
+        id: 4,
+        symbol: "BNB",
+        cmcId: 1839,
+    },
+    {
+        id: 5,
+        symbol: "XRP",
+        cmcId: 52,
+    },
+    {
+        id: 6,
+        symbol: "DOGE",
+        cmcId: 74,
+    },
+    {
+        id: 7,
+        symbol: "ADA",
+        cmcId: 2010,
+    },
+    {
+        id: 8,
+        symbol: "MATIC",
+        cmcId: 3890,
+    },
+    {
+        id: 9,
+        symbol: "LTC",
+        cmcId: 2,
+    },
+    {
+        id: 10,
+        symbol: "DOT",
+        cmcId: 6636,
+    },
+    {
+        id: 11,
+        symbol: "SOL",
+        cmcId: 5426,
+    },
 ];
 
 export default function updatePriceAndRank() {
@@ -27,13 +67,22 @@ export default function updatePriceAndRank() {
 
     // every 5 mins
     const rule = "*/5 * * * *";
-    // const rule = "*/5 * * * * *"; // every 5 seconds for dev
+    // const rule = "*/30 * * * * *"; // every 30 seconds for dev purpose
 
     schedule.scheduleJob(rule, async function () {
         console.log("run updatePriceAndRank job");
 
-        await getAndUpdatePrice();
-        await updateRank();
+        try {
+            await getAndUpdatePrice();
+        } catch (err) {
+            console.log("failed to update price", err);
+        }
+
+        try {
+            await updateRank();
+        } catch (err) {
+            console.log("failed to update rank", err);
+        }
     });
 }
 
