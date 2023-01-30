@@ -78,9 +78,9 @@ model AssetEntity {
     name            String            @unique /// For Bitcoin, it would be Bitcoin
     symbol          String            @unique /// For Bitcoin, this would be BTC
     buyable         Boolean           @default(true) /// USD is not buyable
+    price           Float
     assetType       AssetType
     portfolioAsset  UserAsset[]
-    price           Price[]
     transaction     Transaction[]
     lastTransaction LastTransaction[]
 }
@@ -99,29 +99,6 @@ model UserAsset {
     @@unique([userId, assetEntityId])
 }
 
-/// Price
-/// This is the price of an asset at a given time
-model Price {
-    id            Int   @id @default(autoincrement())
-    assetEntityId Int
-    price         Float
-    priceTimeId   Int
-
-    assetEntity AssetEntity   @relation(fields: [assetEntityId], references: [id], onDelete: Cascade)
-    priceTime   PriceTime     @relation(fields: [priceTimeId], references: [id], onDelete: Cascade)
-    transaction Transaction[]
-
-    @@unique([assetEntityId, priceTimeId])
-}
-
-/// PriceTime
-/// This concept describes the time price getter scheduler is run
-model PriceTime {
-    id        Int      @id @default(autoincrement())
-    timestamp DateTime @unique @default(now())
-    Price     Price[]
-}
-
 /// Transaction
 enum TransactionType {
     BUY
@@ -132,13 +109,12 @@ model Transaction {
     id            String          @id @default(cuid())
     assetEntityId Int
     quantity      Float
-    priceId       Int
+    price         Float
     timestamp     DateTime /// this should be the datetime when the scheduler was run
     type          TransactionType /// BUY or SELL
     userId        String?
 
     assetEntity AssetEntity @relation(fields: [assetEntityId], references: [id])
-    price       Price       @relation(fields: [priceId], references: [id])
     user        User?       @relation(fields: [userId], references: [id])
 
     @@index([userId])

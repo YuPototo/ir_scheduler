@@ -1,6 +1,6 @@
 import { AssetType, ParameterType, User } from "@prisma/client";
 import prisma from "../../prisma/client";
-import { updateRank, getLatestPrices } from "../rank";
+import { updateRank, getAssetPrices } from "../rank";
 import { updatePrice } from "../price";
 
 describe("updateRank()", () => {
@@ -50,18 +50,21 @@ describe("updateRank()", () => {
                 symbol: "USD",
                 assetType: AssetType.CASH,
                 buyable: false,
+                price: 1,
             },
             {
                 id: assetEntityId.BTC,
                 name: "Bitcoin",
                 symbol: "BTC",
                 assetType: AssetType.CRYPTO,
+                price: 20000,
             },
             {
                 id: assetEntityId.ETH,
                 name: "Ethereum",
                 symbol: "ETH",
                 assetType: AssetType.CRYPTO,
+                price: 2000,
             },
         ];
         await prisma.assetEntity.createMany({ data: assetEntities });
@@ -125,62 +128,6 @@ describe("updateRank()", () => {
             data: [...userOneAssets, ...userTwoAssets, ...userThreeAssets],
         });
 
-        // add price times
-        const priceTimes = [
-            {
-                id: 1,
-                timestamp: new Date("2021-01-01T00:00:00.000Z"),
-            },
-            {
-                id: 2,
-                timestamp: new Date("2021-01-02T00:00:00.000Z"),
-            },
-        ];
-        await prisma.priceTime.createMany({ data: priceTimes });
-
-        // add prices
-        const usdPrices = [
-            {
-                id: 1,
-                assetEntityId: assetEntityId.USD,
-                price: 1,
-                priceTimeId: 1,
-            },
-        ];
-
-        const btcPrices = [
-            {
-                id: 3,
-                assetEntityId: assetEntityId.BTC,
-                price: 10000,
-                priceTimeId: 1,
-            },
-            {
-                id: 4,
-                assetEntityId: assetEntityId.BTC,
-                price: 20000,
-                priceTimeId: 2,
-            },
-        ];
-
-        const ethPrices = [
-            {
-                id: 5,
-                assetEntityId: assetEntityId.ETH,
-                price: 1000,
-                priceTimeId: 1,
-            },
-            {
-                id: 6,
-                assetEntityId: assetEntityId.ETH,
-                price: 2000,
-                priceTimeId: 2,
-            },
-        ];
-
-        const prices = [...usdPrices, ...btcPrices, ...ethPrices];
-        await prisma.price.createMany({ data: prices });
-
         // add param
         await prisma.parameter.create({
             data: {
@@ -194,11 +141,11 @@ describe("updateRank()", () => {
     afterAll(async () => {
         await prisma.userAsset.deleteMany();
         await prisma.user.deleteMany();
-        await prisma.price.deleteMany();
         await prisma.assetEntity.deleteMany();
-        await prisma.priceTime.deleteMany();
         await prisma.parameter.deleteMany();
         await prisma.rank.deleteMany();
+
+        await prisma.$disconnect();
     });
 
     it("should update rank", async () => {
@@ -326,7 +273,7 @@ describe("updateRank()", () => {
     });
 });
 
-describe("getLatestPrices()", () => {
+describe("getAssetPrices()", () => {
     const assetEntityId = {
         USD: 1,
         BTC: 2,
@@ -334,8 +281,6 @@ describe("getLatestPrices()", () => {
     };
 
     beforeAll(async () => {
-        // add asset entities
-
         const assetEntities = [
             {
                 id: assetEntityId.USD,
@@ -343,92 +288,35 @@ describe("getLatestPrices()", () => {
                 symbol: "USD",
                 assetType: AssetType.CASH,
                 buyable: false,
+                price: 1,
             },
             {
                 id: assetEntityId.BTC,
                 name: "Bitcoin",
                 symbol: "BTC",
                 assetType: AssetType.CRYPTO,
+                price: 20000,
             },
             {
                 id: assetEntityId.ETH,
                 name: "Ethereum",
                 symbol: "ETH",
                 assetType: AssetType.CRYPTO,
+                price: 2000,
             },
         ];
         await prisma.assetEntity.createMany({ data: assetEntities });
-
-        // add price times
-        const priceTimes = [
-            {
-                id: 1,
-                timestamp: new Date("2021-01-01T00:00:00.000Z"),
-            },
-            {
-                id: 2,
-                timestamp: new Date("2021-01-02T00:00:00.000Z"),
-            },
-        ];
-        await prisma.priceTime.createMany({ data: priceTimes });
-
-        // add prices
-        const usdPrices = [
-            {
-                id: 1,
-                assetEntityId: assetEntityId.USD,
-                price: 1,
-                priceTimeId: 1,
-            },
-        ];
-
-        const btcPrices = [
-            {
-                id: 3,
-                assetEntityId: assetEntityId.BTC,
-                price: 10000,
-                priceTimeId: 1,
-            },
-            {
-                id: 4,
-                assetEntityId: assetEntityId.BTC,
-                price: 50000,
-                priceTimeId: 2,
-            },
-        ];
-
-        const ethPrices = [
-            {
-                id: 5,
-                assetEntityId: assetEntityId.ETH,
-                price: 1000,
-                priceTimeId: 1,
-            },
-            {
-                id: 6,
-                assetEntityId: assetEntityId.ETH,
-                price: 2000,
-                priceTimeId: 2,
-            },
-        ];
-
-        const prices = [...usdPrices, ...btcPrices, ...ethPrices];
-        await prisma.price.createMany({ data: prices });
     });
 
     afterAll(async () => {
-        await prisma.price.deleteMany();
         await prisma.assetEntity.deleteMany();
-        await prisma.priceTime.deleteMany();
     });
 
-    it("should get latest prices", async () => {
-        const prices = await getLatestPrices();
+    it("should get prices", async () => {
+        const prices = await getAssetPrices();
 
-        expect(prices).toEqual({
-            [assetEntityId.USD]: 1,
-            [assetEntityId.BTC]: 50000,
-            [assetEntityId.ETH]: 2000,
-        });
+        expect(prices["1"]).toBe(1);
+        expect(prices["2"]).toBe(20000);
+        expect(prices["3"]).toBe(2000);
     });
 });

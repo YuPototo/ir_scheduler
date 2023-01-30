@@ -6,6 +6,10 @@ describe("deleteUnnamedAccounts()", () => {
         await prisma.user.deleteMany();
     });
 
+    afterAll(async () => {
+        await prisma.$disconnect();
+    });
+
     it("should delete unnamed account", async () => {
         // create users
         // 1 user with name

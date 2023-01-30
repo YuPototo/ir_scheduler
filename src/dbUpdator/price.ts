@@ -6,16 +6,19 @@ export interface AssetEntityPrice {
 }
 
 export async function updatePrice(prices: AssetEntityPrice[]) {
-    // add a new priceTime
-    const priceTime = await prisma.priceTime.create({ data: {} });
+    for (const price of prices) {
+        const { id: assetId, price: assetPrice } = price;
 
-    // insert price in the db
-    const priceData = prices.map((price) => ({
-        assetEntityId: price.id,
-        priceTimeId: priceTime.id,
-        // round price to 2 digits
-        price: Math.round(price.price * 100) / 100,
-    }));
+        // rounded to 2 digits
+        const priceRounded = Math.round(assetPrice * 100) / 100;
 
-    await prisma.price.createMany({ data: priceData });
+        await prisma.assetEntity.update({
+            where: {
+                id: assetId,
+            },
+            data: {
+                price: priceRounded,
+            },
+        });
+    }
 }

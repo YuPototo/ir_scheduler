@@ -1,5 +1,8 @@
 import prisma from "../prisma/client";
 
+/**
+ * Delete unnamed account
+ */
 export default async function deleteUnnamedAccounts(daysSinceCreation: number) {
     const sevenDaysAgo = new Date(
         new Date().getTime() - 1000 * 60 * 60 * 24 * daysSinceCreation

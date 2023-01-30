@@ -7,11 +7,11 @@ export async function updateRank() {
     // get initial dollar value
     const initialCapital = await getInitialDollar();
 
-    // get all asset entities' latest prices
-    const prices = await getLatestPrices();
-
     // get all users
     const users = await prisma.user.findMany({});
+
+    // get all asset prices
+    const prices: AssetPrices = await getAssetPrices();
 
     // todo: make result a sorted array
     const result = [];
@@ -53,24 +53,19 @@ export async function updateRank() {
     console.log("----- updateRank: end");
 }
 
-// get latest prices for every assets
-export async function getLatestPrices(): Promise<{ [key: number]: number }> {
-    const assetEntities = await prisma.assetEntity.findMany();
+type AssetPrices = {
+    [assetId: string]: number;
+};
 
-    const prices = {} as { [key: number]: number };
+/**
+ * Get all asset prices
+ */
+export async function getAssetPrices(): Promise<AssetPrices> {
+    const assets = await prisma.assetEntity.findMany();
 
-    for (const assetEntity of assetEntities) {
-        const price = await prisma.price.findFirst({
-            where: { assetEntityId: assetEntity.id },
-            orderBy: { priceTimeId: "desc" },
-        });
-
-        if (price) {
-            prices[assetEntity.id] = price.price;
-        } else {
-            // this is a critical error
-            throw new Error(`No latest price found for ${assetEntity.id}`);
-        }
+    let output = {} as AssetPrices;
+    for (const asset of assets) {
+        Object.assign(output, { [asset.id]: asset.price });
     }
-    return prices;
+    return output;
 }

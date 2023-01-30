@@ -1,5 +1,8 @@
 import prisma from "../prisma/client";
 
+/**
+ * Get initial dollar amount
+ */
 export default async function getInitialDollar() {
     const initialDollarParam = await prisma.parameter.findFirst({
         where: {
