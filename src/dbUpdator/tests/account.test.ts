@@ -22,18 +22,21 @@ describe("deleteUnnamedAccounts()", () => {
                     email: "user_1@test.com",
                     firstName: "User",
                     familyName: "One",
+                    uniqueName: "user_1",
                 },
                 {
                     email: "user_2@test.com",
                     createdAt: new Date(
                         new Date().getTime() - 1000 * 60 * 60 * 24 * 7 - 1
                     ),
+                    uniqueName: "user_2",
                 },
                 {
                     email: "user_3@test.com",
                     createdAt: new Date(
                         new Date().getTime() - 1000 * 60 * 60 * 24 * 6 - 1
                     ),
+                    uniqueName: "user_3",
                 },
             ],
         });

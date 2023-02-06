@@ -26,16 +26,19 @@ describe("updateRank()", () => {
                 email: user_1_email,
                 firstName: "User",
                 familyName: "One",
+                uniqueName: "user_1",
             },
             {
                 email: user_2_email,
                 firstName: "User",
                 familyName: "Two",
+                uniqueName: "user_2",
             },
             {
                 email: user_3_email,
                 firstName: "User",
                 familyName: "Three",
+                uniqueName: "user_3",
             },
         ];
 
